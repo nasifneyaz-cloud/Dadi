@@ -1,4 +1,4 @@
-const CACHE_NAME = "dadicare-shell-v1";
+const CACHE_NAME = "dadicare-shell-v3";
 const APP_SHELL = [
   "./",
   "./index.html",
