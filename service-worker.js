@@ -1,12 +1,12 @@
-const CACHE_NAME = 'dadicare-shell-v3';
+const CACHE_NAME = 'dadicare-shell-v6-exactlogo';
 const BASE = self.registration.scope;
 const APP_SHELL = [
   BASE,
   new URL('index.html', BASE).href,
   new URL('manifest.webmanifest', BASE).href,
-  new URL('icons/icon-192.png', BASE).href,
-  new URL('icons/icon-512.png', BASE).href,
-  new URL('icons/icon-512-maskable.png', BASE).href
+  new URL('1.png', BASE).href,
+  new URL('2.png', BASE).href,
+  new URL('3.png', BASE).href
 ];
 
 self.addEventListener('install', event => {

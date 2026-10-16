@@ -1,4 +1,4 @@
-DadiCare — PWA update (Print Summary edition)
+DadiCare — PWA update (Exact supplied logo edition)
 
 This package is intended to UPDATE your existing DadiCare installation when deployed to the SAME GitHub Pages website URL. The app identity is kept stable. Do not create a second repository if you want the installed app to update in place.
 
@@ -14,3 +14,10 @@ IMPORTANT
 - Keep a JSON backup of existing records before replacing files. Records remain in browser storage only when the website origin and app code's storage key stay the same.
 - GitHub Pages repository files are public. Do not upload private health records.
 - For first-time setup, GitHub Pages must be deployed over HTTPS. The ZIP itself cannot be installed directly as an app.
+
+
+Logo update: icon-192.png, icon-512.png, and icon-512-maskable.png are individual files in the repository root. The manifest and service worker reference these root-level files.
+
+ICON FILES: The three icons are in the repository root as 1.png, 2.png, and 3.png. Upload all files in this folder to the GitHub Pages root. The manifest and service worker already point to these filenames.
+
+EXACT LOGO: The numbered PNG files use the logo artwork cropped from the exact image you supplied, not a newly generated replacement.
