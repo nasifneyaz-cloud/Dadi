@@ -2,7 +2,7 @@ DadiCare — PWA update (Print Summary edition)
 
 This package is intended to UPDATE your existing DadiCare installation when deployed to the SAME GitHub Pages website URL. The app identity is kept stable. Do not create a second repository if you want the installed app to update in place.
 
-UPLOAD
+UPLOADx
 1. Download and extract this ZIP.
 2. Open the SAME GitHub repository that currently hosts DadiCare.
 3. Replace/update index.html, manifest.webmanifest, and service-worker.js; upload the icons/ folder too. Keep icons inside the icons folder.
