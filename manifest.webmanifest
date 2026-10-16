@@ -1,18 +1,33 @@
 {
-  "id": "./?app=dadicare-print-summary-v2",
+  "id": "./",
   "name": "DadiCare — Health & Habit Tracker",
   "short_name": "DadiCare",
   "description": "A little care, every day. Track daily habits and blood sugar readings, with printable health summaries.",
   "lang": "en-IN",
-  "start_url": "./?app=dadicare-print-summary-v2",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#f5f2eb",
   "theme_color": "#163b39",
   "icons": [
-    {"src":"./icons/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any"},
-    {"src":"./icons/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any"},
-    {"src":"./icons/icon-512-maskable.png","sizes":"512x512","type":"image/png","purpose":"maskable"}
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ]
 }

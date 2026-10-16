@@ -1,19 +1,16 @@
-DadiCare — PWA package (Print Summary edition)
+DadiCare — PWA update (Print Summary edition)
 
-CONTENTS
-- index.html: DadiCare dashboard with date-range Print Health Summary
-- manifest.webmanifest: installable app metadata and unique app identity
-- service-worker.js: offline app-shell caching
-- icons/: install icons
+This package is intended to UPDATE your existing DadiCare installation when deployed to the SAME GitHub Pages website URL. The app identity is kept stable. Do not create a second repository if you want the installed app to update in place.
 
-PUBLISH WITH GITHUB PAGES
-1. Create a separate public GitHub repository for this version (recommended to avoid mixing it with another dashboard/PWA).
-2. Upload the CONTENTS of this folder to the repository root. Make sure index.html, manifest.webmanifest, and service-worker.js are at the root, not inside another folder.
-3. In repository Settings > Pages, deploy from branch main and folder /(root). Save and wait for deployment to finish.
-4. Open the resulting HTTPS GitHub Pages URL in Chrome on Android. Load it once while online.
-5. Chrome menu (⋮) > Install app (or Add to Home screen, depending on Chrome's wording).
+UPLOAD
+1. Download and extract this ZIP.
+2. Open the SAME GitHub repository that currently hosts DadiCare.
+3. Replace/update index.html, manifest.webmanifest, and service-worker.js; upload the icons/ folder too. Keep icons inside the icons folder.
+4. Commit the changes and wait for GitHub Pages to finish deploying.
+5. Open the existing DadiCare website in Chrome while online, refresh it, then close and reopen the installed DadiCare app. If it does not update, open the website again and wait a little for the service worker to update.
 
-NOTES
-- The dashboard keeps records in browser local storage. Existing data is available only when this page runs at the same origin/browser storage location as the previous version. Before replacing a live site, export a JSON backup from the dashboard.
-- GitHub Pages repositories are public. Do not put private health records in repository files. The app's user-entered records remain in browser storage, but this is not a substitute for a secure medical-record system.
-- The service worker enables the app shell to open offline after its first successful online visit; first-time installation requires internet.
+IMPORTANT
+- The installed app is tied to its website URL. If you publish this package at a different URL, Chrome may treat it as a different app.
+- Keep a JSON backup of existing records before replacing files. Records remain in browser storage only when the website origin and app code's storage key stay the same.
+- GitHub Pages repository files are public. Do not upload private health records.
+- For first-time setup, GitHub Pages must be deployed over HTTPS. The ZIP itself cannot be installed directly as an app.

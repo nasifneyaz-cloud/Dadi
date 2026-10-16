@@ -1,31 +1,57 @@
-const CACHE_NAME = 'dadicare-print-summary-v2';
+const CACHE_NAME = 'dadicare-shell-v3';
+const BASE = self.registration.scope;
 const APP_SHELL = [
-  './',
-  './index.html',
-  './manifest.webmanifest',
-  './icons/icon-192.png',
-  './icons/icon-512.png',
-  './icons/icon-512-maskable.png'
+  BASE,
+  new URL('index.html', BASE).href,
+  new URL('manifest.webmanifest', BASE).href,
+  new URL('icons/icon-192.png', BASE).href,
+  new URL('icons/icon-512.png', BASE).href,
+  new URL('icons/icon-512-maskable.png', BASE).href
 ];
+
 self.addEventListener('install', event => {
-  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)));
-  self.skipWaiting();
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE_NAME);
+    await cache.addAll(APP_SHELL);
+    await self.skipWaiting();
+  })());
 });
+
 self.addEventListener('activate', event => {
-  event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key)))));
-  self.clients.claim();
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(keys.filter(key => key.startsWith('dadicare-shell-') && key !== CACHE_NAME)
+      .map(key => caches.delete(key)));
+    await self.clients.claim();
+  })());
 });
+
 self.addEventListener('fetch', event => {
-  if (event.request.method !== 'GET') return;
-  const url = new URL(event.request.url);
+  const request = event.request;
+  if (request.method !== 'GET') return;
+  const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
-  event.respondWith(
-    caches.match(event.request).then(cached => cached || fetch(event.request).then(response => {
-      if (response && response.ok) {
-        const copy = response.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+
+  if (request.mode === 'navigate') {
+    event.respondWith((async () => {
+      try {
+        const response = await fetch(request);
+        if (response && response.ok) {
+          const cache = await caches.open(CACHE_NAME);
+          await cache.put(new URL('index.html', BASE).href, response.clone());
+        }
+        return response;
+      } catch (error) {
+        return (await caches.match(request)) || (await caches.match(new URL('index.html', BASE).href)) || Response.error();
       }
-      return response;
-    }).catch(() => caches.match('./index.html')))
-  );
+    })());
+    return;
+  }
+
+  event.respondWith((async () => {
+    const cached = await caches.match(request);
+    if (cached) return cached;
+    try { return await fetch(request); }
+    catch (error) { return Response.error(); }
+  })());
 });
