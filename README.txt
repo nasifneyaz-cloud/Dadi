@@ -1,20 +1,19 @@
-# DadiCare PWA
+DadiCare — PWA package (Print Summary edition)
 
-This folder is a ready-to-deploy Progressive Web App package.
+CONTENTS
+- index.html: DadiCare dashboard with date-range Print Health Summary
+- manifest.webmanifest: installable app metadata and unique app identity
+- service-worker.js: offline app-shell caching
+- icons/: install icons
 
-## Included
-- `index.html` — existing DadiCare dashboard and its existing features
-- `manifest.webmanifest` — app name, icon, launch mode and theme
-- `service-worker.js` — caches the app shell for offline reopening
-- `icons/` — Android app icons
+PUBLISH WITH GITHUB PAGES
+1. Create a separate public GitHub repository for this version (recommended to avoid mixing it with another dashboard/PWA).
+2. Upload the CONTENTS of this folder to the repository root. Make sure index.html, manifest.webmanifest, and service-worker.js are at the root, not inside another folder.
+3. In repository Settings > Pages, deploy from branch main and folder /(root). Save and wait for deployment to finish.
+4. Open the resulting HTTPS GitHub Pages URL in Chrome on Android. Load it once while online.
+5. Chrome menu (⋮) > Install app (or Add to Home screen, depending on Chrome's wording).
 
-## Important: host over HTTPS
-Android Chrome only offers PWA installation when the app is served from HTTPS (or localhost for testing). Opening `index.html` directly as a local file will not enable installation or offline service-worker caching.
-
-## Deploy
-Upload the *contents* of this folder to an HTTPS static host, keeping the folder structure. For example, use GitHub Pages or Netlify. Then open the deployed URL in Chrome on Android and choose `Install app` from the in-page button or Chrome's ⋮ menu.
-
-## Data and privacy
-DadiCare continues to use browser `localStorage` with the same key (`dadicare-v1`) and existing data format. Browser storage is tied to the site's origin. Data that was entered while opening the old `file://` HTML may not automatically appear after hosting the app at an HTTPS URL. Before switching, open the old dashboard and use Export CSV to back up readings; also keep the old file until you have checked the new hosted version. CSV export backs up readings, but does not export habit checkboxes.
-
-The dashboard stores health information on the device/browser; this package does not send records to a server. Do not use a shared/public device, and keep a separate backup if the records matter.
+NOTES
+- The dashboard keeps records in browser local storage. Existing data is available only when this page runs at the same origin/browser storage location as the previous version. Before replacing a live site, export a JSON backup from the dashboard.
+- GitHub Pages repositories are public. Do not put private health records in repository files. The app's user-entered records remain in browser storage, but this is not a substitute for a secure medical-record system.
+- The service worker enables the app shell to open offline after its first successful online visit; first-time installation requires internet.
