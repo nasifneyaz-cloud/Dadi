@@ -2,15 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#163b39">
-<link rel="manifest" href="./manifest.webmanifest">
-<link rel="icon" href="./icons/icon-192.png" type="image/png">
-<link rel="apple-touch-icon" href="./icons/icon-192.png"><title>DadiCare — Health & Habit Tracker</title>
+<meta name="theme-color" content="#163b39"><title>DadiCare — Health & Habit Tracker</title>
 <style>
 :root{--bg:#f5f2eb;--card:#fffefa;--ink:#1d2927;--muted:#66736f;--line:#e2e4dc;--green:#216b54;--teal:#227d83;--amber:#9a5b13;--red:#a63232;--soft:#e8f3ed;--shadow:0 8px 24px #203a3010}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer}
 header{background:#163b39;color:white;padding:18px max(16px,calc((100% - 1180px)/2));display:flex;gap:15px;align-items:center;justify-content:space-between;flex-wrap:wrap}
-.brand{display:flex;gap:12px;align-items:center}.logo{display:grid;place-items:center;width:46px;height:46px;background:#ffffff18;border-radius:15px;overflow:hidden}.logo img{width:100%;height:100%;object-fit:cover}
+.brand{display:flex;gap:12px;align-items:center}.logo{display:grid;place-items:center;width:46px;height:46px;background:#ffffff18;border-radius:15px;font-size:25px}
 h1{font-size:23px;margin:0;font-family:Georgia,serif;font-weight:600}header p{margin:2px 0 0;color:#c5d9d4;font-size:13px}
 main{max-width:1180px;margin:auto;padding:20px 16px 45px}.nav{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 18px}
 .nav button,.btn{border:1px solid var(--line);background:white;color:var(--ink);border-radius:11px;padding:10px 14px;font-weight:650}
@@ -46,7 +43,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:24px 0 5px}
 }
 </style></head>
 <body>
-<header><div class="brand"><div class="logo"><img src="./icon-192.png" alt="DadiCare logo"></div><div><h1>DadiCare</h1><p>A little care, every day · Health, habits & sugar record</p></div></div><div class="row"><span id="todayLabel"></span><button class="btn small" id="printSummaryBtn" type="button">Print summary</button></div></header>
+<header><div class="brand"><div class="logo">🌿</div><div><h1>DadiCare</h1><p>A little care, every day · Health, habits & sugar record</p></div></div><div class="row"><span id="todayLabel"></span><button class="btn small" id="printSummaryBtn" type="button">Print summary</button></div></header>
 <section id="printReport" aria-label="Printable health summary"></section>
 <main>
 <nav class="nav" aria-label="Main navigation"><button class="active" data-tab="daily">Check & Log</button><button data-tab="sugar">Sugar Record</button><button data-tab="advice">Advice</button></nav>
@@ -89,7 +86,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:24px 0 5px}
 <div class="weeks" id="weekMeans"></div><div style="margin-top:15px"><canvas id="chart" width="900" height="230" style="width:100%;height:auto;display:block" aria-label="Glucose trend chart"></canvas></div>
 <div class="warning" style="margin-top:12px">Weekly periods are days 1–7, 8–14, 15–21, and 22–month end. Readings in different units are converted for calculation and displayed in the selected display unit. A mean can hide important highs or lows; review individual values with the care team.</div>
 </div>
-<div class="card span12"><div class="row between"><div><h2>Reading history</h2><p class="sub">Correct mistakes or remove an entry. Only valid saved records are included in averages.</p></div><div class="row"><button class="btn" id="exportCsv">Export CSV</button><button class="btn" id="exportBackup">Backup JSON</button><label class="btn" for="importBackup">Restore backup</label><input id="importBackup" type="file" accept="application/json" hidden></div></div>
+<div class="card span12"><div class="row between"><div><h2>Reading history</h2><p class="sub">Past readings remain saved. Choose a month or show all records below.</p></div><div class="row"><label for="historyScope">Show records</label><select id="historyScope"><option value="month">Selected month</option><option value="all">All saved records</option></select><button class="btn" id="exportCsv">Export CSV</button><button class="btn" id="exportBackup">Backup JSON</button><label class="btn" for="importBackup">Restore backup</label><input id="importBackup" type="file" accept="application/json" hidden></div></div>
 <div class="tablewrap"><table><thead><tr><th>Date & time</th><th>Session</th><th>Value</th><th>Context</th><th>Notes</th><th>Actions</th></tr></thead><tbody id="history"></tbody></table></div><div id="emptyHistory" class="empty">No readings recorded for this month yet.</div></div>
 </div></section>
 <section id="tab-advice" class="hidden">
@@ -161,9 +158,9 @@ $('sugarDone').checked=m&&e;$('sugarMeta').textContent=`Morning: ${m?'logged':'p
 habitIds.slice(2).forEach(id=>$(id).checked=!!h[id]);habitIds.forEach(id=>$(id).closest('.task').classList.toggle('done',!!$(id).checked));$('sugarTask').classList.toggle('done',m&&e);
 let done=Number(!!h.morningMed)+Number(!!h.eveningMed)+Number(m&&e)+habitIds.slice(2).filter(id=>h[id]).length,total=3+habitIds.length-2;let pct=Math.round(done/total*100);
 $('medStat').textContent=`${Number(!!h.morningMed)+Number(!!h.eveningMed)} / 2`;$('sugarStat').textContent=`${Number(m)+Number(e)} / 2`;$('moveStat').textContent=h.moveDone?'Done':'Pending';$('pctStat').textContent=pct+'%';$('dailyBar').style.width=pct+'%';$('dayNote').value=h.note||'';$('contact').value=db.contact||''}
-function renderSugar(){let month=$('monthPick').value||selected.slice(0,7),rs=db.readings.filter(r=>monthKey(r.date)===month&&valid(r)).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time)),unit=$('rUnit').value||'mg/dL';let m=mean(rs);$('monthMean').textContent=display(m,unit)+' '+unit;$('monthN').textContent=rs.length+' valid readings';$('countN').textContent=rs.length;$('morningN').textContent=rs.filter(r=>r.slot==='Morning').length;$('eveningN').textContent=rs.filter(r=>r.slot==='Evening').length;
+function renderSugar(){let month=$('monthPick').value||selected.slice(0,7),allValid=db.readings.filter(valid).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time)),rs=allValid.filter(r=>monthKey(r.date)===month),unit=$('rUnit').value||'mg/dL';let m=mean(rs);$('monthMean').textContent=display(m,unit)+' '+unit;$('monthN').textContent=rs.length+' valid readings';$('countN').textContent=rs.length;$('morningN').textContent=rs.filter(r=>r.slot==='Morning').length;$('eveningN').textContent=rs.filter(r=>r.slot==='Evening').length;
 $('weekMeans').innerHTML=[0,1,2,3].map(i=>{let a=rs.filter(r=>{let d=+r.date.slice(8,10);return d>=i*7+1&&(i<3?d<=(i+1)*7:true)}),v=mean(a);return `<div class="week"><span class="muted">Week ${i+1} · days ${i*7+1}–${i<3?(i+1)*7:'end'}</span><strong>${display(v,unit)} ${v===null?'':unit}</strong><span class="muted">${a.length} readings</span></div>`}).join('');
-$('history').innerHTML=rs.slice().reverse().map(r=>`<tr><td>${nice(r.date)} ${safe(r.time)}</td><td>${safe(r.slot)}</td><td><strong>${r.value} ${safe(r.unit)}</strong></td><td>${safe(r.type)}</td><td>${safe(r.note||'—')}</td><td><button class="btn small" data-edit="${safe(r.id)}">Edit</button> <button class="btn small danger" data-del="${safe(r.id)}">Delete</button></td></tr>`).join('');$('emptyHistory').classList.toggle('hidden',rs.length>0);
+let historyRows=$('historyScope')&&$('historyScope').value==='all'?allValid:rs;$('history').innerHTML=historyRows.slice().reverse().map(r=>`<tr><td>${nice(r.date)} ${safe(r.time)}</td><td>${safe(r.slot)}</td><td><strong>${r.value} ${safe(r.unit)}</strong></td><td>${safe(r.type)}</td><td>${safe(r.note||'—')}</td><td><button class="btn small" data-edit="${safe(r.id)}">Edit</button> <button class="btn small danger" data-del="${safe(r.id)}">Delete</button></td></tr>`).join('');$('emptyHistory').textContent=historyRows.length?'':'No readings saved for this view.';$('emptyHistory').classList.toggle('hidden',historyRows.length>0);
 drawChart(rs,unit)}
 function drawChart(rs,unit){let c=$('chart'),ctx=c.getContext('2d'),w=c.width,h=c.height;ctx.clearRect(0,0,w,h);ctx.fillStyle='#66736f';ctx.font='14px system-ui';if(!rs.length){ctx.fillText('Your saved readings will appear here.',20,35);return}let vals=rs.map(r=>unit==='mmol/L'?asMg(r)/18.0182:asMg(r)),lo=Math.min(...vals),hi=Math.max(...vals);if(lo===hi){lo=Math.max(0,lo-1);hi+=1}let pad=35;ctx.strokeStyle='#e2e4dc';ctx.lineWidth=1;for(let i=0;i<4;i++){let y=pad+(h-pad*2)*i/3;ctx.beginPath();ctx.moveTo(pad,y);ctx.lineTo(w-pad,y);ctx.stroke()}ctx.strokeStyle='#227d83';ctx.lineWidth=3;ctx.beginPath();vals.forEach((v,i)=>{let x=pad+(w-pad*2)*(rs.length===1?0.5:i/(rs.length-1)),y=h-pad-(v-lo)/(hi-lo)*(h-pad*2);i?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.stroke();vals.forEach((v,i)=>{let x=pad+(w-pad*2)*(rs.length===1?0.5:i/(rs.length-1)),y=h-pad-(v-lo)/(hi-lo)*(h-pad*2);ctx.fillStyle='#216b54';ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);ctx.fill()});ctx.fillStyle='#66736f';ctx.fillText(`${display(lo,unit)} ${unit}`,4,h-pad+4);ctx.fillText(`${display(hi,unit)} ${unit}`,4,pad+4)}
 function render(){ $('todayLabel').textContent=nice(today());$('selectedDate').value=selected;$('rDate').value=selected;$('monthPick').value=selected.slice(0,7);renderDaily();renderSugar()}
@@ -174,7 +171,7 @@ $('saveContact').addEventListener('click',()=>{db.contact=$('contact').value;sav
 $('readingForm').addEventListener('submit',e=>{e.preventDefault();let v=Number($('rValue').value);if(!Number.isFinite(v)||v<=0||v>2000){alert('Enter a valid positive reading.');return}let r={id:editing||('r'+Date.now()),date:$('rDate').value,time:$('rTime').value,slot:$('rSlot').value,value:v,unit:$('rUnit').value,type:$('rType').value,note:$('rNote').value};if(!r.date||!r.time)return;if(editing){let i=db.readings.findIndex(x=>x.id===editing);if(i>=0)db.readings[i]=r;else db.readings.push(r)}else db.readings.push(r);selected=r.date;editing=null;$('editId').value='';$('saveReading').textContent='Save reading';$('cancelEdit').hidden=true;$('readingForm').reset();$('rDate').value=selected;$('rTime').value='08:00';save();document.querySelector('[data-tab="sugar"]').click()});
 $('cancelEdit').addEventListener('click',()=>{editing=null;$('readingForm').reset();$('rDate').value=selected;$('rTime').value='08:00';$('saveReading').textContent='Save reading';$('cancelEdit').hidden=true});
 $('history').addEventListener('click',e=>{let ed=e.target.closest('[data-edit]'),del=e.target.closest('[data-del]');if(ed){let r=db.readings.find(x=>x.id===ed.dataset.edit);if(!r)return;editing=r.id;['rDate','rTime','rSlot','rValue','rUnit','rType','rNote'].forEach((id,i)=>{});$('rDate').value=r.date;$('rTime').value=r.time;$('rSlot').value=r.slot;$('rValue').value=r.value;$('rUnit').value=r.unit;$('rType').value=r.type;$('rNote').value=r.note||'';$('saveReading').textContent='Update reading';$('cancelEdit').hidden=false;window.scrollTo({top:0,behavior:'smooth'})}if(del&&confirm('Delete this reading? Averages will be recalculated.')){db.readings=db.readings.filter(x=>x.id!==del.dataset.del);save()}});
-$('monthPick').addEventListener('change',renderSugar);
+$('monthPick').addEventListener('change',renderSugar);$('historyScope').addEventListener('change',renderSugar);
 function download(name,content,type){let a=document.createElement('a'),url=URL.createObjectURL(new Blob([content],{type}));a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),500)}
 $('exportCsv').addEventListener('click',()=>{let rows=[['date','time','session','value','unit','context','notes'],...db.readings.map(r=>[r.date,r.time,r.slot,r.value,r.unit,r.type,r.note||''])];download('dadicare-readings.csv',rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n'),'text/csv')});
 $('exportBackup').addEventListener('click',()=>download('dadicare-backup.json',JSON.stringify(db,null,2),'application/json'));
@@ -202,10 +199,4 @@ $('printSummaryBtn').addEventListener('click',()=>{
 window.addEventListener('afterprint',()=>document.body.classList.remove('printing-summary'));
 $('rDate').value=selected;$('rTime').value='08:00';render();
 })();
-</script>
-<script>
-if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(err => console.warn('Service worker registration failed:', err)));
-}
-</script>
-</body></html>
+</script></body></html>
