@@ -3,7 +3,7 @@
   "name": "DadiCare — Health & Habit Tracker",
   "short_name": "DadiCare",
   "description": "A little care, every day. Track daily habits and blood sugar readings, with printable health summaries.",
-  "lang": "ur-IN",
+  "lang": "en-IN",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

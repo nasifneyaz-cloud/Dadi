@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dadicare-shell-v7-historyfix';
+const CACHE_NAME = 'dadicare-shell-v8-installfix';
 const BASE = self.registration.scope;
 const APP_SHELL = [
   BASE,

@@ -2,7 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#163b39"><title>DadiCare — Health & Habit Tracker</title>
+<meta name="theme-color" content="#163b39">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="./1.png">
+<link rel="apple-touch-icon" href="./1.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="DadiCare">
+<title>DadiCare — Health & Habit Tracker</title>
 <style>
 :root{--bg:#f5f2eb;--card:#fffefa;--ink:#1d2927;--muted:#66736f;--line:#e2e4dc;--green:#216b54;--teal:#227d83;--amber:#9a5b13;--red:#a63232;--soft:#e8f3ed;--shadow:0 8px 24px #203a3010}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer}
@@ -26,10 +32,25 @@ h2{font-size:22px;font-family:Georgia,serif;margin:0 0 6px}h3{font-size:16px;mar
 .hidden{display:none!important}.empty{padding:18px;color:var(--muted);text-align:center;font-size:13px}
 footer{text-align:center;color:var(--muted);font-size:12px;padding:24px 0 5px}
 @media(max-width:760px){.span8,.span4,.span6{grid-column:span 12}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.weeks{grid-template-columns:repeat(2,minmax(0,1fr))}header{align-items:flex-start}h1{font-size:20px}}
-@media print{header,.nav,.no-print{display:none!important}body{background:white}.card{box-shadow:none;break-inside:avoid}.hidden{display:none!important}}
+#printReport{display:none}
+@media print{
+  body{background:white;color:#111;font-size:11pt}
+  body.printing-summary>header,body.printing-summary>main,body.printing-summary>footer{display:none!important}
+  body.printing-summary #printReport{display:block!important}
+  #printReport{padding:0 8mm;font-family:Arial,sans-serif}
+  #printReport h1{font-size:22pt;margin:0 0 4mm;color:#163b39}
+  #printReport h2{font-size:15pt;margin:6mm 0 2mm}
+  #printReport p{margin:2mm 0}
+  #printReport table{width:100%;border-collapse:collapse;font-size:9pt;margin-top:2mm}
+  #printReport th,#printReport td{border:1px solid #bbb;padding:5px;white-space:normal;vertical-align:top}
+  #printReport .print-meta{color:#444;font-size:9pt}
+  #printReport .print-section{break-inside:avoid}
+  #printReport .print-muted{color:#555}
+}
 </style></head>
 <body>
-<header><div class="brand"><div class="logo">🌿</div><div><h1>DadiCare</h1><p>A little care, every day · Health, habits & sugar record</p></div></div><div class="row"><span id="todayLabel"></span><button class="btn small" onclick="window.print()">Print summary</button></div></header>
+<header><div class="brand"><div class="logo">🌿</div><div><h1>DadiCare</h1><p>A little care, every day · Health, habits & sugar record</p></div></div><div class="row"><span id="todayLabel"></span><button class="btn small" id="printSummaryBtn" type="button">Print summary</button></div></header>
+<section id="printReport" aria-label="Printable health summary"></section>
 <main>
 <nav class="nav" aria-label="Main navigation"><button class="active" data-tab="daily">Check & Log</button><button data-tab="sugar">Sugar Record</button><button data-tab="advice">Advice</button></nav>
 <section id="tab-daily">
@@ -71,20 +92,60 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:24px 0 5px}
 <div class="weeks" id="weekMeans"></div><div style="margin-top:15px"><canvas id="chart" width="900" height="230" style="width:100%;height:auto;display:block" aria-label="Glucose trend chart"></canvas></div>
 <div class="warning" style="margin-top:12px">Weekly periods are days 1–7, 8–14, 15–21, and 22–month end. Readings in different units are converted for calculation and displayed in the selected display unit. A mean can hide important highs or lows; review individual values with the care team.</div>
 </div>
-<div class="card span12"><div class="row between"><div><h2>Reading history</h2><p class="sub">Correct mistakes or remove an entry. Only valid saved records are included in averages.</p></div><div class="row"><button class="btn" id="exportCsv">Export CSV</button><button class="btn" id="exportBackup">Backup JSON</button><label class="btn" for="importBackup">Restore backup</label><input id="importBackup" type="file" accept="application/json" hidden></div></div>
-<div class="tablewrap"><table><thead><tr><th>Reading date/time</th><th>Session</th><th>Value</th><th>Context</th><th>Notes</th><th>Logged at</th><th>Actions</th></tr></thead><tbody id="history"></tbody></table></div><div id="emptyHistory" class="empty">No readings recorded for this month yet.</div></div>
+<div class="card span12"><div class="row between"><div><h2>Reading history</h2><p class="sub">Past readings remain saved. Choose a month or show all records below.</p></div><div class="row"><label for="historyScope">Show records</label><select id="historyScope"><option value="month">Selected month</option><option value="all">All saved records</option></select><button class="btn" id="exportCsv">Export CSV</button><button class="btn" id="exportBackup">Backup JSON</button><label class="btn" for="importBackup">Restore backup</label><input id="importBackup" type="file" accept="application/json" hidden></div></div>
+<div class="tablewrap"><table><thead><tr><th>Measurement date & time</th><th>Logged at</th><th>Session</th><th>Value</th><th>Context</th><th>Notes</th><th>Actions</th></tr></thead><tbody id="history"></tbody></table></div><div id="emptyHistory" class="empty">No readings recorded for this month yet.</div></div>
 </div></section>
 <section id="tab-advice" class="hidden">
 <div class="grid">
-<div class="card span6"><h2>Everyday diabetes care</h2><h3>Food and routines</h3><ul><li>Build balanced meals with vegetables, suitable protein such as dal/beans/eggs, and portions of roti or rice that fit the person's plan.</li><li>Prefer whole fruit to juice and limit sugary drinks and frequent sweets. No single food or home remedy cures diabetes.</li><li>Follow prescribed medication instructions and the care team's monitoring schedule.</li><li>Choose comfortable movement if safe; a gentle post-meal walk may suit some people, but follow individual medical advice.</li><li>Wear suitable footwear and follow personal foot-care guidance. Report new sores or changes.</li><li>Keep appointments and ask the clinician about individual glucose targets, eye/foot/kidney checks, and sick-day guidance.</li></ul><div class="warning">Do not stop treatment, change doses, or double a missed dose based on this app. Do not force fluids or exercise when unwell.</div></div>
-<div class="card span6"><h2>When to get help</h2><h3>Possible low blood glucose</h3><p>Shakiness, sweating, dizziness, confusion, or unusual weakness can be warning signs. Follow the person's clinician-provided action plan.</p><h3>Possible high blood glucose</h3><p>Unusual thirst, frequent urination, blurred vision, or marked tiredness may need attention. Contact the healthcare professional for repeated concerning readings or symptoms.</p><div class="dangerbox"><strong>Emergency:</strong> severe confusion, unconsciousness, seizure, inability to swallow safely, or other severe symptoms require emergency help. Never give food or drink to someone who cannot swallow safely. Follow the emergency plan and local emergency services.</div></div>
-<div class="card span12"><h2>معلومات آسان اردو میں</h2><p>ڈاکٹر کی ہدایت کے مطابق دوا لیں اور شوگر چیک کریں۔ دوا خود سے بند نہ کریں اور خوراک تبدیل نہ کریں۔ متوازن کھانا کھائیں، مناسب جسمانی سرگرمی کریں، پاؤں کی دیکھ بھال کریں اور ڈاکٹر کے مشورے پر عمل کریں۔ اگر بار بار شوگر غیر معمولی آئے یا طبیعت خراب ہو تو ڈاکٹر سے رابطہ کریں۔ بے ہوشی، دورہ، شدید الجھن یا نگلنے میں مشکل ہو تو فوراً ایمرجنسی مدد لیں۔</p><h2>हिंदी में आसान सलाह</h2><p>डॉक्टर के बताए अनुसार दवा लें और शुगर जाँचें। दवा खुद से बंद न करें या खुराक न बदलें। संतुलित भोजन करें, सुरक्षित गतिविधि करें, पैरों की देखभाल करें और नियमित जाँच कराएँ। बार-बार असामान्य रीडिंग या तबीयत खराब होने पर डॉक्टर से संपर्क करें। बेहोशी, दौरा, गंभीर भ्रम या निगलने में परेशानी हो तो तुरंत आपातकालीन सहायता लें।</p></div>
+<div class="card span6" dir="rtl" lang="ur" style="text-align:right;line-height:1.9">
+<h2>ذیابیطس کی روزمرہ دیکھ بھال — تفصیلی اردو رہنمائی</h2>
+<h3>۱۔ دوا اور شوگر کی نگرانی</h3>
+<ul>
+<li>دوا یا انسولین صرف ڈاکٹر کے بتائے ہوئے طریقے، مقدار اور وقت کے مطابق استعمال کریں۔ اپنی طرف سے دوا بند نہ کریں، مقدار کم یا زیادہ نہ کریں، اور بھولی ہوئی خوراک پوری کرنے کے لیے دوگنی خوراک نہ لیں۔ اگر خوراک رہ جائے تو اپنے ڈاکٹر یا فارماسسٹ سے طے شدہ ہدایت معلوم کریں۔</li>
+<li>شوگر اسی وقت اور اسی طریقے سے چیک کریں جو ڈاکٹر نے بتایا ہے۔ ہر ریڈنگ کے ساتھ تاریخ، وقت، کھانے سے پہلے یا بعد کی کیفیت، اور اگر کوئی غیر معمولی بات ہوئی ہو تو نوٹ کریں۔ ایک اکیلی ریڈنگ کے بجائے مسلسل ریکارڈ ڈاکٹر کو بہتر فیصلہ کرنے میں مدد دیتا ہے۔</li>
+<li>اپنی ریڈنگز کا موازنہ صرف اپنے ڈاکٹر کے مقرر کردہ ہدف سے کریں؛ ہر شخص کا ہدف عمر، علاج اور دوسری بیماریوں کے مطابق مختلف ہو سکتا ہے۔</li>
+</ul>
+<h3>۲۔ متوازن کھانا اور پانی</h3>
+<ul>
+<li>کھانے میں سبزیاں، دالیں یا دوسری مناسب پروٹین، اور روٹی یا چاول کی وہ مقدار شامل رکھیں جو ذاتی غذائی منصوبے کے مطابق ہو۔ مقدار اور کھانے کے اوقات میں اچانک بڑی تبدیلی کرنے کے بجائے ڈاکٹر یا ماہرِ غذائیت سے مشورہ کریں۔</li>
+<li>میٹھے مشروبات، شربت، جوس اور بار بار مٹھائی کھانے کو محدود رکھیں۔ پھل عموماً جوس کے بجائے سالم کھانا بہتر ہے، مگر مقدار اور انتخاب اپنی صحت کے مطابق رکھیں۔ کوئی ایک غذا، جڑی بوٹی یا گھریلو نسخہ ذیابیطس کا علاج نہیں ہے۔</li>
+<li>کھانا چھوڑنے یا بہت دیر سے کھانے سے گریز کریں، خاص طور پر اگر ایسی دوا استعمال ہوتی ہو جس سے شوگر کم ہو سکتی ہے۔ اگر بھوک، متلی یا بیماری کی وجہ سے کھانا مشکل ہو تو طبی مشورہ لیں۔</li>
+<li>پانی کی مقدار اپنے ڈاکٹر کی ہدایت کے مطابق رکھیں۔ اگر دل یا گردوں کی وجہ سے پانی محدود کرنے کو کہا گیا ہے تو زبردستی زیادہ پانی نہ پئیں۔</li>
+</ul>
+<h3>۳۔ محفوظ چہل قدمی، نیند اور پاؤں کی حفاظت</h3>
+<ul>
+<li>اگر طبیعت ٹھیک ہو اور ڈاکٹر نے منع نہ کیا ہو تو اپنی استطاعت کے مطابق ہلکی چہل قدمی یا مناسب حرکت کریں۔ ابتدا آہستہ کریں، آرام کی ضرورت ہو تو آرام کریں، اور بیماری یا کمزوری میں ورزش پر اصرار نہ کریں۔</li>
+<li>آرام دہ اور مناسب جوتے پہنیں۔ روزانہ پاؤں دیکھیں کہ کہیں چھالا، زخم، سوجن، سرخی یا رنگ میں تبدیلی تو نہیں۔ پاؤں کو جلانے والی گرم چیزیں استعمال نہ کریں؛ زخم یا نئی تبدیلی ہو تو جلد طبی مشورہ لیں۔</li>
+<li>نیند کا باقاعدہ معمول بنائیں، ڈاکٹر کی ملاقاتیں نہ چھوڑیں، اور آنکھوں، گردوں، پاؤں اور دیگر ضروری معائنوں کے بارے میں پوچھتے رہیں۔ بیماری، بخار، قے یا کھانا پینا کم ہونے کی صورت میں پہلے سے طے شدہ sick-day plan پر عمل کریں یا طبی ٹیم سے رابطہ کریں۔</li>
+</ul>
+<div class="warning">اہم: یہ عمومی رہنمائی ہے، ذاتی علاج کا متبادل نہیں۔ دوا، انسولین، خوراک یا ورزش میں بڑی تبدیلی ڈاکٹر کے مشورے کے بغیر نہ کریں۔</div>
+</div>
+<div class="card span6" dir="rtl" lang="ur" style="text-align:right;line-height:1.9">
+<h2>کب فوراً مدد لینی چاہیے؟</h2>
+<h3>شوگر کم ہونے کی ممکنہ علامات</h3>
+<p>پسینہ آنا، کپکپی، چکر، اچانک کمزوری، بھوک یا الجھن شوگر کم ہونے کی علامات ہو سکتی ہیں۔ اگر ممکن ہو تو شوگر چیک کریں اور مریض کے ڈاکٹر کے بتائے ہوئے منصوبے کے مطابق عمل کریں۔ اگر علامات بار بار ہوں تو علاج کے منصوبے پر نظرِ ثانی کے لیے ڈاکٹر سے رابطہ کریں۔</p>
+<h3>شوگر زیادہ ہونے کی ممکنہ علامات</h3>
+<p>غیر معمولی پیاس، بار بار پیشاب، دھندلا دکھائی دینا یا بہت زیادہ تھکن قابلِ توجہ علامات ہیں۔ بار بار تشویش ناک ریڈنگ آنے یا طبیعت خراب ہونے پر ڈاکٹر سے رابطہ کریں؛ صرف ایپ کے اوسط یا چارٹ کی بنیاد پر خود علاج تبدیل نہ کریں۔</p>
+<div class="dangerbox"><strong>فوری ایمرجنسی:</strong> بے ہوشی، دورہ، شدید الجھن، یا محفوظ طریقے سے نگل نہ پانا ہنگامی حالت ہو سکتی ہے۔ فوراً مقامی ایمرجنسی مدد حاصل کریں اور پہلے سے دی گئی طبی ہدایات پر عمل کریں۔ جو شخص ہوش میں نہ ہو یا محفوظ طریقے سے نگل نہ سکتا ہو، اسے کھانا، پانی یا منہ سے دوا نہ دیں۔</div>
+<h3>ڈاکٹر سے یہ باتیں پوچھیں</h3>
+<ul><li>میرے لیے شوگر کا مناسب ہدف کیا ہے اور کن اوقات میں ریڈنگ لینی چاہیے؟</li><li>شوگر کم یا زیادہ ہونے پر میرے لیے مخصوص قدم کیا ہیں؟</li><li>بیماری یا کھانا کم کھانے کے دنوں میں دوا کے متعلق کیا ہدایت ہے؟</li><li>آنکھوں، گردوں، پاؤں اور دوسری ضروری جانچ کب کروانی ہے؟</li></ul>
+</div>
+<div class="card span12" dir="rtl" lang="ur" style="text-align:right;line-height:1.9">
+<h2>روزانہ کا آسان اصول</h2>
+<p>دوا وقت پر، شوگر کا درست ریکارڈ، متوازن کھانا، محفوظ حرکت، پاؤں کی روزانہ دیکھ بھال اور ڈاکٹر کی باقاعدہ نگرانی—یہ چھ عادتیں طویل مدت میں ذیابیطس کو سنبھالنے میں مدد دیتی ہیں۔ کسی دن معمول پورا نہ ہو تو پریشان ہونے کے بجائے اگلے قدم پر واپس آئیں۔ ریڈنگز چھپانے یا اندازہ لگانے کے بجائے درست ریکارڈ رکھیں تاکہ ڈاکٹر بہتر رہنمائی کر سکے۔</p>
+<hr>
+<h2>हिंदी में सलाह</h2>
+<p>दवा और इंसुलिन डॉक्टर के बताए समय और मात्रा के अनुसार लें। अपनी ओर से दवा बंद न करें या खुराक न बदलें। डॉक्टर के निर्देशानुसार शुगर जाँचें और तारीख, समय तथा खाने से पहले/बाद की जानकारी लिखें। संतुलित भोजन करें—सब्जियाँ, दाल या उपयुक्त प्रोटीन और अपनी योजना के अनुसार रोटी/चावल लें। मीठे पेय और बार-बार मिठाई सीमित रखें; कोई घरेलू नुस्खा मधुमेह का इलाज नहीं है। सुरक्षित हो तो अपनी क्षमता के अनुसार चलें, आरामदायक जूते पहनें और रोज़ पैरों में घाव, सूजन या लालिमा देखें। बार-बार असामान्य रीडिंग या तबीयत खराब होने पर डॉक्टर से संपर्क करें। बेहोशी, दौरा, गंभीर भ्रम या सुरक्षित रूप से निगल न पाने पर तुरंत आपातकालीन मदद लें। बेहोश व्यक्ति को मुँह से खाना-पानी या दवा न दें।</p>
+<hr>
+<h2>English — brief guidance</h2>
+<p>Take medicines as prescribed, record glucose readings, eat balanced meals, move safely, check feet daily, and contact the care team about repeated unusual readings or illness. Seek emergency help for unconsciousness, seizures, severe confusion, or unsafe swallowing.</p>
+</div>
 </div></section>
 <footer>DadiCare · Private, local-first tracker · Not a diagnostic tool or a replacement for professional medical care.</footer>
 </main>
 <script>
 (()=>{'use strict';
-const $=id=>document.getElementById(id), today=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}, currentTime=()=>{const d=new Date();return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`};
+const $=id=>document.getElementById(id), today=()=>new Date().toLocaleDateString('en-CA'), clockTime=()=>{const d=new Date();return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')};
 const key='dadicare_final_v2'; let db={habits:{},readings:[],contact:''}; try{db={...db,...JSON.parse(localStorage.getItem(key)||'{}')}}catch(e){}
 let selected=today(), editing=null;
 const habitIds=['morningMed','eveningMed','moveDone','mealDone','waterDone','feetDone','sleepDone'];
@@ -95,6 +156,7 @@ function monthKey(d){return d.slice(0,7)}
 function allForDay(d){return db.readings.filter(r=>r.date===d)}
 function asMg(r){return r.unit==='mmol/L'?Number(r.value)*18.0182:Number(r.value)}
 function nice(d){return new Date(d+'T12:00:00').toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})}
+function loggedLabel(ts){if(!ts)return 'Not captured (older record)';const d=new Date(ts);return Number.isNaN(d.getTime())?'Not captured (older record)':d.toLocaleString(undefined,{year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'})}
 function mean(a){return a.length?a.reduce((s,r)=>s+asMg(r),0)/a.length:null}
 function display(v,unit){return v===null?'—':(unit==='mmol/L'?v/18.0182:v).toLocaleString(undefined,{maximumFractionDigits:1})}
 function valid(r){return Number.isFinite(Number(r.value))&&Number(r.value)>0&&Number(r.value)<=2000&&['mg/dL','mmol/L'].includes(r.unit)}
@@ -103,24 +165,54 @@ $('sugarDone').checked=m&&e;$('sugarMeta').textContent=`Morning: ${m?'logged':'p
 habitIds.slice(2).forEach(id=>$(id).checked=!!h[id]);habitIds.forEach(id=>$(id).closest('.task').classList.toggle('done',!!$(id).checked));$('sugarTask').classList.toggle('done',m&&e);
 let done=Number(!!h.morningMed)+Number(!!h.eveningMed)+Number(m&&e)+habitIds.slice(2).filter(id=>h[id]).length,total=3+habitIds.length-2;let pct=Math.round(done/total*100);
 $('medStat').textContent=`${Number(!!h.morningMed)+Number(!!h.eveningMed)} / 2`;$('sugarStat').textContent=`${Number(m)+Number(e)} / 2`;$('moveStat').textContent=h.moveDone?'Done':'Pending';$('pctStat').textContent=pct+'%';$('dailyBar').style.width=pct+'%';$('dayNote').value=h.note||'';$('contact').value=db.contact||''}
-function renderSugar(){let month=$('monthPick').value||selected.slice(0,7),rs=db.readings.filter(r=>monthKey(r.date)===month&&valid(r)).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time)),unit=$('rUnit').value||'mg/dL';let m=mean(rs);$('monthMean').textContent=display(m,unit)+' '+unit;$('monthN').textContent=rs.length+' valid readings';$('countN').textContent=rs.length;$('morningN').textContent=rs.filter(r=>r.slot==='Morning').length;$('eveningN').textContent=rs.filter(r=>r.slot==='Evening').length;
+function renderSugar(){let month=$('monthPick').value||selected.slice(0,7),allValid=db.readings.filter(valid).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time)),rs=allValid.filter(r=>monthKey(r.date)===month),unit=$('rUnit').value||'mg/dL';let m=mean(rs);$('monthMean').textContent=display(m,unit)+' '+unit;$('monthN').textContent=rs.length+' valid readings';$('countN').textContent=rs.length;$('morningN').textContent=rs.filter(r=>r.slot==='Morning').length;$('eveningN').textContent=rs.filter(r=>r.slot==='Evening').length;
 $('weekMeans').innerHTML=[0,1,2,3].map(i=>{let a=rs.filter(r=>{let d=+r.date.slice(8,10);return d>=i*7+1&&(i<3?d<=(i+1)*7:true)}),v=mean(a);return `<div class="week"><span class="muted">Week ${i+1} · days ${i*7+1}–${i<3?(i+1)*7:'end'}</span><strong>${display(v,unit)} ${v===null?'':unit}</strong><span class="muted">${a.length} readings</span></div>`}).join('');
-$('history').innerHTML=rs.slice().reverse().map(r=>{let logged=r.loggedAt?new Date(r.loggedAt).toLocaleString(): 'Not recorded in older entry';return `<tr><td>${nice(r.date)} ${safe(r.time||'—')}</td><td>${safe(r.slot||'Other')}</td><td><strong>${safe(r.value)} ${safe(r.unit)}</strong></td><td>${safe(r.type||'—')}</td><td>${safe(r.note||'—')}</td><td>${safe(logged)}</td><td><button class="btn small" data-edit="${safe(r.id)}">Edit</button> <button class="btn small danger" data-del="${safe(r.id)}">Delete</button></td></tr>`}).join('');$('emptyHistory').classList.toggle('hidden',rs.length>0);
+let historyRows=$('historyScope')&&$('historyScope').value==='all'?allValid:rs;$('history').innerHTML=historyRows.slice().reverse().map(r=>`<tr><td>${nice(r.date)} ${safe(r.time)}</td><td>${safe(loggedLabel(r.loggedAt))}</td><td>${safe(r.slot)}</td><td><strong>${r.value} ${safe(r.unit)}</strong></td><td>${safe(r.type)}</td><td>${safe(r.note||'—')}</td><td><button class="btn small" data-edit="${safe(r.id)}">Edit</button> <button class="btn small danger" data-del="${safe(r.id)}">Delete</button></td></tr>`).join('');$('emptyHistory').textContent=historyRows.length?'':'No readings saved for this view.';$('emptyHistory').classList.toggle('hidden',historyRows.length>0);
 drawChart(rs,unit)}
 function drawChart(rs,unit){let c=$('chart'),ctx=c.getContext('2d'),w=c.width,h=c.height;ctx.clearRect(0,0,w,h);ctx.fillStyle='#66736f';ctx.font='14px system-ui';if(!rs.length){ctx.fillText('Your saved readings will appear here.',20,35);return}let vals=rs.map(r=>unit==='mmol/L'?asMg(r)/18.0182:asMg(r)),lo=Math.min(...vals),hi=Math.max(...vals);if(lo===hi){lo=Math.max(0,lo-1);hi+=1}let pad=35;ctx.strokeStyle='#e2e4dc';ctx.lineWidth=1;for(let i=0;i<4;i++){let y=pad+(h-pad*2)*i/3;ctx.beginPath();ctx.moveTo(pad,y);ctx.lineTo(w-pad,y);ctx.stroke()}ctx.strokeStyle='#227d83';ctx.lineWidth=3;ctx.beginPath();vals.forEach((v,i)=>{let x=pad+(w-pad*2)*(rs.length===1?0.5:i/(rs.length-1)),y=h-pad-(v-lo)/(hi-lo)*(h-pad*2);i?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.stroke();vals.forEach((v,i)=>{let x=pad+(w-pad*2)*(rs.length===1?0.5:i/(rs.length-1)),y=h-pad-(v-lo)/(hi-lo)*(h-pad*2);ctx.fillStyle='#216b54';ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);ctx.fill()});ctx.fillStyle='#66736f';ctx.fillText(`${display(lo,unit)} ${unit}`,4,h-pad+4);ctx.fillText(`${display(hi,unit)} ${unit}`,4,pad+4)}
-function render(){ $('todayLabel').textContent=nice(today());$('selectedDate').value=selected;$('rDate').value=selected;if(!$('monthPick').value)$('monthPick').value=selected.slice(0,7);renderDaily();renderSugar()}
+function render(){ $('todayLabel').textContent=nice(today());$('selectedDate').value=selected;$('rDate').value=selected;$('monthPick').value=selected.slice(0,7);renderDaily();renderSugar()}
 document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x===b));['daily','sugar','advice'].forEach(t=>$('tab-'+t).classList.toggle('hidden',t!==b.dataset.tab));if(b.dataset.tab==='sugar')renderSugar()}));
-$('selectedDate').addEventListener('change',e=>{selected=e.target.value||today();if(!editing){$('rDate').value=selected;$('rTime').value=currentTime();$('monthPick').value=selected.slice(0,7)}render()});habitIds.forEach(id=>$(id).addEventListener('change',e=>{day()[id]=e.target.checked;save()}));
+$('selectedDate').addEventListener('change',e=>{selected=e.target.value||today();render()});habitIds.forEach(id=>$(id).addEventListener('change',e=>{day()[id]=e.target.checked;save()}));
 $('saveDayNote').addEventListener('click',()=>{day().note=$('dayNote').value;save();$('noteSaved').textContent='Saved';setTimeout(()=>$('noteSaved').textContent='',1500)});
 $('saveContact').addEventListener('click',()=>{db.contact=$('contact').value;save();alert('Contact saved on this device.')});
-$('readingForm').addEventListener('submit',e=>{e.preventDefault();let v=Number($('rValue').value);if(!Number.isFinite(v)||v<=0||v>2000){alert('Enter a valid positive reading.');return}let previous=editing?db.readings.find(x=>x.id===editing):null;let r={id:editing||('r'+Date.now()),date:$('rDate').value,time:$('rTime').value,loggedAt:previous?.loggedAt||new Date().toISOString(),slot:$('rSlot').value,value:v,unit:$('rUnit').value,type:$('rType').value,note:$('rNote').value};if(!r.date||!r.time)return;if(editing){let i=db.readings.findIndex(x=>x.id===editing);if(i>=0)db.readings[i]=r;else db.readings.push(r)}else db.readings.push(r);selected=r.date;$('monthPick').value=selected.slice(0,7);editing=null;$('editId').value='';$('saveReading').textContent='Save reading';$('cancelEdit').hidden=true;$('readingForm').reset();$('rDate').value=selected;$('rTime').value=currentTime();save();document.querySelector('[data-tab="sugar"]').click()});
-$('cancelEdit').addEventListener('click',()=>{editing=null;$('readingForm').reset();$('rDate').value=selected;$('rTime').value=currentTime();$('saveReading').textContent='Save reading';$('cancelEdit').hidden=true});
+$('readingForm').addEventListener('submit',e=>{e.preventDefault();let v=Number($('rValue').value);if(!Number.isFinite(v)||v<=0||v>2000){alert('Enter a valid positive reading.');return}let previous=editing?db.readings.find(x=>x.id===editing):null;let r={id:editing||('r'+Date.now()),date:$('rDate').value,time:$('rTime').value,slot:$('rSlot').value,value:v,unit:$('rUnit').value,type:$('rType').value,note:$('rNote').value,loggedAt:previous?.loggedAt||new Date().toISOString()};if(!r.date||!r.time)return;if(editing){let i=db.readings.findIndex(x=>x.id===editing);if(i>=0)db.readings[i]={...db.readings[i],...r};else db.readings.push(r)}else db.readings.push(r);selected=r.date;editing=null;$('editId').value='';$('saveReading').textContent='Save reading';$('cancelEdit').hidden=true;$('readingForm').reset();$('rDate').value=selected;$('rTime').value=clockTime();save();document.querySelector('[data-tab="sugar"]').click()});
+$('cancelEdit').addEventListener('click',()=>{editing=null;$('readingForm').reset();$('rDate').value=selected;$('rTime').value=clockTime();$('saveReading').textContent='Save reading';$('cancelEdit').hidden=true});
 $('history').addEventListener('click',e=>{let ed=e.target.closest('[data-edit]'),del=e.target.closest('[data-del]');if(ed){let r=db.readings.find(x=>x.id===ed.dataset.edit);if(!r)return;editing=r.id;['rDate','rTime','rSlot','rValue','rUnit','rType','rNote'].forEach((id,i)=>{});$('rDate').value=r.date;$('rTime').value=r.time;$('rSlot').value=r.slot;$('rValue').value=r.value;$('rUnit').value=r.unit;$('rType').value=r.type;$('rNote').value=r.note||'';$('saveReading').textContent='Update reading';$('cancelEdit').hidden=false;window.scrollTo({top:0,behavior:'smooth'})}if(del&&confirm('Delete this reading? Averages will be recalculated.')){db.readings=db.readings.filter(x=>x.id!==del.dataset.del);save()}});
-$('monthPick').addEventListener('change',renderSugar);
+$('monthPick').addEventListener('change',renderSugar);$('historyScope').addEventListener('change',renderSugar);
 function download(name,content,type){let a=document.createElement('a'),url=URL.createObjectURL(new Blob([content],{type}));a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),500)}
-$('exportCsv').addEventListener('click',()=>{let rows=[['date','reading_time','logged_at','session','value','unit','context','notes'],...db.readings.map(r=>[r.date,r.time,r.loggedAt||'',r.slot,r.value,r.unit,r.type,r.note||''])];download('dadicare-readings.csv',rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n'),'text/csv')});
+$('exportCsv').addEventListener('click',()=>{let rows=[['date','measurement_time','session','value','unit','context','notes','logged_at'],...db.readings.map(r=>[r.date,r.time,r.slot,r.value,r.unit,r.type,r.note||'',r.loggedAt||''])];download('dadicare-readings.csv',rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n'),'text/csv')});
 $('exportBackup').addEventListener('click',()=>download('dadicare-backup.json',JSON.stringify(db,null,2),'application/json'));
 $('importBackup').addEventListener('change',e=>{let f=e.target.files[0];if(!f)return;let rd=new FileReader();rd.onload=()=>{try{let x=JSON.parse(rd.result);if(!x||!Array.isArray(x.readings)||typeof x.habits!=='object')throw Error();if(confirm('Replace the current local tracker data with this backup?')){db=x;save();alert('Backup restored.')}}catch(err){alert('This backup file is invalid or incompatible.')}e.target.value=''};rd.readAsText(f)});
-$('rDate').value=selected;$('rTime').value=currentTime();$('monthPick').value=selected.slice(0,7);render();
+function printSummary(from,to){
+  from=from||selected;to=to||from;
+  if(from>to){alert('The start date must be on or before the end date.');return}
+  const readings=db.readings.filter(r=>valid(r)&&r.date>=from&&r.date<=to).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
+  const allDays=Object.keys(db.habits||{}).filter(d=>d>=from&&d<=to).sort();
+  const habitLabel={morningMed:'Morning medicine confirmed',eveningMed:'Evening medicine confirmed',moveDone:'Suitable movement / walk',mealDone:'Balanced meals followed',waterDone:'Fluids according to personal advice',feetDone:'Foot care / footwear check',sleepDone:'Sleep routine protected'};
+  const habitsHtml=allDays.length?allDays.map(d=>{const h=db.habits[d]||{};const checks=Object.entries(habitLabel).filter(([k])=>h[k]).map(([,v])=>v);return `<tr><td>${safe(nice(d))}</td><td>${checks.length?checks.map(safe).join('; '):'No habits marked complete'}</td><td>${h.note?safe(h.note):'—'}</td></tr>`}).join(''):'<tr><td colspan="3">No daily habit records in this date range.</td></tr>';
+  const unit=$('rUnit').value||'mg/dL';const avg=readings.length?readings.reduce((s,r)=>s+asMg(r),0)/readings.length:null;
+  const fmtAvg=avg===null?'—':`${display(avg,unit)} ${safe(unit)}`;
+  const rows=readings.length?readings.map(r=>`<tr><td>${safe(nice(r.date))}</td><td>${safe(r.time)}</td><td>${safe(loggedLabel(r.loggedAt))}</td><td>${safe(r.slot)}</td><td>${safe(r.value)} ${safe(r.unit)}</td><td>${safe(r.type)}</td><td>${safe(r.note||'—')}</td></tr>`).join(''):'<tr><td colspan="7">No glucose readings recorded in this date range.</td></tr>';
+  $('printReport').innerHTML=`<h1>DadiCare — Health Summary</h1><p class="print-meta">Report generated: ${safe(nice(today()))} · Date range: ${safe(nice(from))} to ${safe(nice(to))}</p><p class="print-meta">For discussion with the healthcare professional. This report summarizes recorded data and does not provide a diagnosis.</p><div class="print-section"><h2>Glucose readings</h2><p><strong>Valid readings:</strong> ${readings.length} &nbsp; <strong>Mean:</strong> ${fmtAvg}</p><p class="print-muted">The mean is descriptive only and may hide high or low readings. Individual readings and their context matter.</p><table><thead><tr><th>Date</th><th>Measurement time</th><th>Logged at</th><th>Session</th><th>Reading</th><th>Context</th><th>Notes / symptoms</th></tr></thead><tbody>${rows}</tbody></table></div><div class="print-section"><h2>Daily habits and notes</h2><table><thead><tr><th>Date</th><th>Habits marked complete</th><th>Notes / symptoms / questions</th></tr></thead><tbody>${habitsHtml}</tbody></table></div><div class="print-section"><h2>Medication confirmations</h2><p>These are user-marked confirmations only, not independently verified medication records. Follow the prescribed schedule; do not change doses based on this report.</p></div><p class="print-meta">Private health information. Store and share this report carefully.</p>`;
+  document.body.classList.add('printing-summary');window.print();
+}
+$('printSummaryBtn').addEventListener('click',()=>{
+  const picker=document.createElement('div');picker.id='printPicker';picker.className='no-print';picker.style.cssText='padding:16px;background:#fffefa;border:1px solid #e2e4dc;border-radius:12px;margin:0 0 16px';
+  picker.innerHTML=`<h2>Print health summary</h2><p>Select the date range to include. Readings and daily notes in this range will be included.</p><div style="display:flex;gap:12px;flex-wrap:wrap;align-items:end"><label>From <input id="printFrom" type="date" value="${selected}"></label><label>To <input id="printTo" type="date" value="${selected}"></label><button type="button" id="confirmPrint" class="btn primary">Prepare & print</button><button type="button" id="cancelPrint" class="btn">Cancel</button></div>`;
+  const previous=$('printPicker');if(previous)previous.remove();document.querySelector('main').prepend(picker);
+  $('confirmPrint').addEventListener('click',()=>{const from=$('printFrom').value||selected,to=$('printTo').value||from;picker.remove();printSummary(from,to)});
+  $('cancelPrint').addEventListener('click',()=>picker.remove());
+});
+window.addEventListener('afterprint',()=>document.body.classList.remove('printing-summary'));
+$('rDate').value=selected;$('rTime').value=clockTime();render();
 })();
-</script></body></html>
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./service-worker.js', {scope:'./'})
+      .catch(err => console.error('DadiCare service worker registration failed:', err));
+  });
+}
+</script>
+</body></html>
